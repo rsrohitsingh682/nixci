@@ -56,7 +56,9 @@ pub struct NixStoreCmd;
 impl NixStoreCmd {
     pub fn command(&self) -> Command {
         let mut cmd = Command::new("nix-store");
-        cmd.kill_on_drop(true).stderr(Stdio::inherit()); // Inherit the stderr stream
+        cmd.kill_on_drop(true)
+            .stderr(Stdio::inherit()) // Inherit the stderr stream
+            .stdout(Stdio::piped()); // Capture stdout
         cmd
     }
 }
@@ -116,7 +118,6 @@ impl NixStoreCmd {
             "--include-outputs",
             &drv_path.0.to_string_lossy().as_ref(),
         ]);
-        cmd.stdout(Stdio::piped()); // Capture stdout
         nix_rs::command::trace_cmd(&cmd);
         let out = cmd.output().await?;
         if out.status.success() {
@@ -131,7 +132,6 @@ impl NixStoreCmd {
             Ok(out)
         } else {
             let exit_code = out.status.code().unwrap_or(1);
-            let stderr_output = String::from_utf8(out.stderr)?;
             bail!(
                 "nix-store --query --requisites --include-outputs failed to run (exited: {})",
                 exit_code
