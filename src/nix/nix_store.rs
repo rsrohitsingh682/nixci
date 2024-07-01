@@ -98,9 +98,11 @@ impl NixStoreCmd {
             Ok(DrvOut(PathBuf::from(drv_path)))
         } else {
             let exit_code = out.status.code().unwrap_or(1);
+            let stderr_output = String::from_utf8_lossy(&out.stderr);
             bail!(
-                "nix-store --query --deriver failed to run (exited: {})",
-                exit_code
+                "nix-store --query --deriver failed to run (exited: {}).\nStderr: {}",
+                exit_code,
+                stderr_output
             );
         }
     }
@@ -132,9 +134,11 @@ impl NixStoreCmd {
             Ok(out)
         } else {
             let exit_code = out.status.code().unwrap_or(1);
+            let stderr_output = String::from_utf8_lossy(&out.stderr);
             bail!(
-                "nix-store --query --requisites --include-outputs failed to run (exited: {})",
-                exit_code
+                "nix-store --query --requisites --include-outputs failed to run (exited: {}).\nStderr: {}",
+                exit_code,
+                stderr_output
             );
         }
     }
