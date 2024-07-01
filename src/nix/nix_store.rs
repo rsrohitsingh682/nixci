@@ -78,6 +78,8 @@ impl NixStoreCmd {
         }
         let mut all_outs = Vec::new();
         for drv in all_drvs {
+             // Print all DrvOut values
+            println!("DrvOut values: {:?}", drv);
             let deps = self
                 .nix_store_query_requisites_with_outputs(drv.clone())
                 .await?;
@@ -87,10 +89,9 @@ impl NixStoreCmd {
     }
 
     /// Return the derivation used to build the given build output.
-    async fn nix_store_query_deriver(&self, out_path: PathBuf) -> Result<DrvOut> {
+    async fn nix_store_query_deriver(&self, out_path: PathBuf) -> Result<DrvOut> { 
         let mut cmd = self.command();
         cmd.args(["--query", "--deriver", &out_path.to_string_lossy().as_ref()]);
-        cmd.stdout(Stdio::piped()); // Capture stdout
         nix_rs::command::trace_cmd(&cmd);
         let out = cmd.output().await?;
         if out.status.success() {
@@ -113,6 +114,8 @@ impl NixStoreCmd {
         &self,
         drv_path: DrvOut,
     ) -> Result<Vec<StorePath>> {
+        
+        println!("Running nix_store_query_deriver for: {:?}", drv_path);
         let mut cmd = self.command();
         cmd.args([
             "--query",
