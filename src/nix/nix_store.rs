@@ -78,7 +78,7 @@ impl NixStoreCmd {
         }
         let mut all_outs = Vec::new();
         for drv in all_drvs {
-             // Print all DrvOut values
+            // Print all DrvOut values
             println!("DrvOut values: {:?}", drv);
             let deps = self
                 .nix_store_query_requisites_with_outputs(drv.clone())
@@ -89,7 +89,7 @@ impl NixStoreCmd {
     }
 
     /// Return the derivation used to build the given build output.
-    async fn nix_store_query_deriver(&self, out_path: PathBuf) -> Result<DrvOut> { 
+    async fn nix_store_query_deriver(&self, out_path: PathBuf) -> Result<DrvOut> {
         let mut cmd = self.command();
         cmd.args(["--query", "--deriver", &out_path.to_string_lossy().as_ref()]);
         nix_rs::command::trace_cmd(&cmd);
@@ -99,11 +99,10 @@ impl NixStoreCmd {
             Ok(DrvOut(PathBuf::from(drv_path)))
         } else {
             let exit_code = out.status.code().unwrap_or(1);
-            let stderr_output = String::from_utf8_lossy(&out.stderr);
+            //let stderr_output = String::from_utf8_lossy(&out.stderr);
             bail!(
-                "nix-store --query --deriver failed to run (exited: {}).\nStderr: {}",
-                exit_code,
-                stderr_output
+                "nix-store --query --deriver failed to run (exited: {})",
+                exit_code
             );
         }
     }
@@ -114,8 +113,11 @@ impl NixStoreCmd {
         &self,
         drv_path: DrvOut,
     ) -> Result<Vec<StorePath>> {
-        
-        println!("Running nix_store_query_deriver for: {:?}", drv_path);
+        //println!("Running nix_store_query_deriver for: {:?}", drv_path);
+        println!(
+            "Running nix_store_query_deriver for: {:?}",
+            drv_path.0.to_string_lossy().as_ref()
+        );
         let mut cmd = self.command();
         cmd.args([
             "--query",
@@ -137,11 +139,10 @@ impl NixStoreCmd {
             Ok(out)
         } else {
             let exit_code = out.status.code().unwrap_or(1);
-            let stderr_output = String::from_utf8_lossy(&out.stderr);
+            //let stderr_output = String::from_utf8_lossy(&out.stderr);
             bail!(
-                "nix-store --query --requisites --include-outputs failed to run (exited: {}).\nStderr: {}",
-                exit_code,
-                stderr_output
+                "nix-store --query --requisites --include-outputs failed to run (exited: {})",
+                exit_code
             );
         }
     }

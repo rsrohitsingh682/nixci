@@ -43,10 +43,17 @@ async fn nixci_build(
     let all_devour_flake_outs = nixci_subflakes(cmd, verbose, build_cfg, cfg).await?;
 
     if build_cfg.print_all_dependencies {
-        let all_deps = NixStoreCmd
+        match NixStoreCmd
             .fetch_all_deps(all_devour_flake_outs.into_iter().collect())
-            .await?;
-        all_outs.extend(all_deps.into_iter());
+            .await
+        {
+            Ok(all_deps) => {
+                all_outs.extend(all_deps.into_iter());
+            }
+            Err(e) => {
+                eprintln!("Error: {}", e);
+            }
+        }
     } else {
         let store_paths: HashSet<StorePath> = all_devour_flake_outs
             .into_iter()
