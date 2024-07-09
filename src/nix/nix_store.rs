@@ -92,16 +92,16 @@ impl NixStoreCmd {
         let out = cmd.output().await.map_err(CommandError::ChildProcessError)?;
         if out.status.success() {
             let drv_path = String::from_utf8(out.stdout)?.trim().to_string();
+            if drv_path.contains("unknown-deriver️") {
+                let exit_code = Some(1);
+                let stderr = Some("nix-store --query --deriver returned UnknownDeriver".to_string());
+                return Err(NixCmdError::from(CommandError::ProcessFailed { stderr, exit_code }));
+            }
             Ok(DrvOut(PathBuf::from(drv_path)))
         } else {
             let stderr = String::from_utf8(out.stderr).ok();
             let exit_code = out.status.code();
             Err(CommandError::ProcessFailed { stderr, exit_code }.into())
-            // let exit_code = out.status.code().unwrap_or(1);
-            // bail!(
-            //     "nix-store --query --deriver failed to run (exited: {})",
-            //     exit_code
-            // );
         }
     }
 
